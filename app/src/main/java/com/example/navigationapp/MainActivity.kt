@@ -1,9 +1,10 @@
 package com.example.navigationapp
 
-import androidx.appcompat.app.AppCompatActivity
+import android.content.res.Configuration
 import android.os.Bundle
 import android.util.SparseArray
 import android.view.MenuItem
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationView
@@ -11,26 +12,31 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
+    private var isLandscape = false;
     private var savedStateSparseArray = SparseArray<Fragment.SavedState>()
     private var currentSelectItemId = R.id.nav_home
     private val tabIdToName = mapOf(
-            R.id.nav_home to "Home",
-            R.id.nav_favorites to "Favorites",
-            R.id.nav_search to "Search"
+        R.id.nav_home to "Home",
+        R.id.nav_favorites to "Favorites",
+        R.id.nav_search to "Search"
     )
     private val nameToTabId = mapOf(
-            "Home" to R.id.nav_home,
-            "Favorites" to R.id.nav_favorites,
-            "Search" to R.id.nav_search
+        "Home" to R.id.nav_home,
+        "Favorites" to R.id.nav_favorites,
+        "Search" to R.id.nav_search
     )
     private val tabIds = listOf(R.id.nav_home, R.id.nav_favorites, R.id.nav_search)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val orientation = resources.configuration.orientation
+        isLandscape = orientation == Configuration.ORIENTATION_LANDSCAPE
+
         if (savedInstanceState != null) {
             savedStateSparseArray =
-                    savedInstanceState.getSparseParcelableArray(CONTAINER)
-                            ?: SparseArray()
+                savedInstanceState.getSparseParcelableArray(CONTAINER)
+                    ?: SparseArray()
             currentSelectItemId = savedInstanceState.getInt(CURRENT_TAB)
         }
         setContentView(R.layout.activity_main)
@@ -82,8 +88,8 @@ class MainActivity : AppCompatActivity() {
         val currentFragment = supportFragmentManager.findFragmentById(R.id.container_fragment)
         if (currentFragment != null) {
             savedStateSparseArray.put(
-                    currentSelectItemId,
-                    supportFragmentManager.saveFragmentInstanceState(currentFragment)
+                currentSelectItemId,
+                supportFragmentManager.saveFragmentInstanceState(currentFragment)
             )
         }
     }
@@ -114,8 +120,8 @@ class MainActivity : AppCompatActivity() {
             }
         }
         supportFragmentManager.beginTransaction().setCustomAnimations(inAnim, outAnim)
-                .replace(R.id.container_fragment, fragment, name)
-                .commit()
+            .replace(R.id.container_fragment, fragment, name)
+            .commit()
     }
 
     override fun onBackPressed() {
@@ -134,7 +140,9 @@ class MainActivity : AppCompatActivity() {
                             bottom_navigation.selectedItemId = prevId
                         }
                         val prevName = tabIdToName[prevId]
-                        prevName?.let { setFragment(prevName, prevId) }
+                        if (isLandscape) {
+                            prevName?.let { setFragment(prevName, prevId) }
+                        }
                         return
                     }
                 }
